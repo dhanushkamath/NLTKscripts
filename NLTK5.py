@@ -1,0 +1,103 @@
+
+# CHINKING
+
+#You may find that, after a lot of chunking, you have some words in your chunk you still do not want,
+# but you have no idea how to get rid of them by chunking. You may find that chinking is your solution.
+
+# Chinking is the opposite of chunking.
+# Chinking is a lot like chunking, it is basically a way for you to remove a chunk from a chunk.
+# The chunk that you remove from your chunk is your chink.
+
+
+
+import nltk
+# Because nltk data was downloaded in the D drive.
+nltk.data.path.append('/media/dhanush/DATA/PyCharm_Projects_Ddrive/nltk_data')
+from nltk.corpus import state_union # State of the union addresses by various US presidents
+from nltk.tokenize import PunktSentenceTokenizer
+# The PunktSentenceTokenizer is an unsupervised ML sentence tokenizer. Pretrained, but can be retrained.
+
+# The NLTK POS tagger works with tokenized sentences, so you need to break your text into sentences
+# and word tokens before you can POS tag.
+
+
+
+'''
+POS tag lists:
+
+CC	coordinating conjunction
+CD	cardinal digit
+DT	determiner
+EX	existential there (like: "there is" ... think of it like "there exists")
+FW	foreign word
+IN	preposition/subordinating conjunction
+JJ	adjective	'big'
+JJR	adjective, comparative	'bigger'
+JJS	adjective, superlative	'biggest'
+LS	list marker	1)
+MD	modal	could, will
+NN	noun, singular 'desk'
+NNS	noun plural	'desks'
+NNP	proper noun, singular	'Harrison'
+NNPS	proper noun, plural	'Americans'
+PDT	predeterminer	'all the kids'
+POS	possessive ending	parent's
+PRP	personal pronoun	I, he, she
+PRP$	possessive pronoun	my, his, hers
+RB	adverb	very, silently,
+RBR	adverb, comparative	better
+RBS	adverb, superlative	best
+RP	particle	give up
+TO	to	go 'to' the store.
+UH	interjection	errrrrrrrm
+VB	verb, base form	take
+VBD	verb, past tense	took
+VBG	verb, gerund/present participle	taking
+VBN	verb, past participle	taken
+VBP	verb, sing. present, non-3d	take
+VBZ	verb, 3rd person sing. present	takes
+WDT	wh-determiner	which
+WP	wh-pronoun	who, what
+WP$	possessive wh-pronoun	whose
+WRB	wh-abverb	where, when
+'''
+
+# The NLTK POS tagger works with tokenized sentences, so you need to break your text into sentences
+# and word tokens before you can POS tag.
+
+
+train_text = state_union.raw("2005-GWBush.txt") # we are grabbing the raw text
+sample_text = state_union.raw("2006-GWBush.txt")
+
+custom_sent_tokenizer = PunktSentenceTokenizer(train_text) # So we are training the tokenizer with the 2005 speech
+
+tokenized = custom_sent_tokenizer.tokenize(sample_text) # Tokenizing 2006 speech
+
+
+def process_content():
+    try:
+        for i in tokenized:
+            words = nltk.word_tokenize(i)
+            tagged = nltk.pos_tag(words)
+
+            # part of speech tags are denoted with the "<" and ">" and we can also place regular expressions
+            # within the tags themselves, so account for things like "all nouns" (<N.*>)
+
+            chunkGram = r"""Chunk: {<.*>+}
+                        }<VB.?|IN|DT|>+{"""
+            # These opposite curly braces define chink. So this chunkGram says take
+            # chunks of everything except any tense of verb, IN or DT.
+            # This means we're removing from the chink one or more verbs,
+            # prepositions, determiners,
+
+
+            chunkParser = nltk.RegexpParser(chunkGram) # Declaring a chunkparser with the above regex
+            chunked = chunkParser.parse(tagged)
+            print(chunked)
+            chunked.draw()
+
+
+    except Exception as e:
+        print(str(e))
+
+process_content()
